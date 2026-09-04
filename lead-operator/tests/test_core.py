@@ -21,11 +21,29 @@ class TestLLMClient:
             }]
         }
         
-        with patch('httpx.AsyncClient.post') as mock_post:
-            mock_post.return_value.json.return_value = mock_response
-            mock_post.return_value.status_code = 200
-            mock_post.return_value.raise_for_status = MagicMock()
-            
+        # Create async mock for the response object
+        mock_resp_obj = MagicMock()
+        mock_resp_obj.json = MagicMock(return_value=mock_response)
+        mock_resp_obj.status_code = 200
+        mock_resp_obj.raise_for_status = MagicMock()
+        
+        # Create async mock for client.post() that returns the response
+        async def mock_post(*args, **kwargs):
+            return mock_resp_obj
+        
+        # Create async context manager mock for httpx.AsyncClient
+        mock_async_client_instance = MagicMock()
+        mock_async_client_instance.post = mock_post
+        
+        # Mock the __aenter__ and __aexit__ for the async context manager
+        async def async_enter(self):
+            return mock_async_client_instance
+        async def async_exit(self, *args):
+            pass
+        mock_async_client_instance.__aenter__ = async_enter
+        mock_async_client_instance.__aexit__ = async_exit
+        
+        with patch('httpx.AsyncClient', return_value=mock_async_client_instance):
             client = DashScopeClient()
             result = await client.extract_json(
                 system_prompt="Test prompt",
@@ -52,11 +70,29 @@ class TestLLMClient:
             }]
         }
         
-        with patch('httpx.AsyncClient.post') as mock_post:
-            mock_post.return_value.json.return_value = mock_response
-            mock_post.return_value.status_code = 200
-            mock_post.return_value.raise_for_status = MagicMock()
-            
+        # Create async mock for the response object
+        mock_resp_obj = MagicMock()
+        mock_resp_obj.json = MagicMock(return_value=mock_response)
+        mock_resp_obj.status_code = 200
+        mock_resp_obj.raise_for_status = MagicMock()
+        
+        # Create async mock for client.post() that returns the response
+        async def mock_post(*args, **kwargs):
+            return mock_resp_obj
+        
+        # Create async context manager mock for httpx.AsyncClient
+        mock_async_client_instance = MagicMock()
+        mock_async_client_instance.post = mock_post
+        
+        # Mock the __aenter__ and __aexit__ for the async context manager
+        async def async_enter(self):
+            return mock_async_client_instance
+        async def async_exit(self, *args):
+            pass
+        mock_async_client_instance.__aenter__ = async_enter
+        mock_async_client_instance.__aexit__ = async_exit
+        
+        with patch('httpx.AsyncClient', return_value=mock_async_client_instance):
             client = DashScopeClient()
             result = await client.extract_json(
                 system_prompt="Test",
