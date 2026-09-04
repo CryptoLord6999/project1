@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: lead_operator_app
+    env_file: .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./app:/app/app
+      - ./clients:/app/clients
+    restart: unless-stopped
+    networks:
+      - lead_operator_net
+
+  db:
+    image: postgres:15-alpine
+    container_name: lead_operator_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: lead_operator
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - lead_operator_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: lead_operator_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - lead_operator_net
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  lead_operator_net:
+    driver: bridge
